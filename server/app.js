@@ -6,7 +6,7 @@ const helmet = require("helmet");
 const connectDB = require("./db");
 const passport = require("./config/passport");
 const authRoutes = require("./routes/authRoutes");
-require('dotenv').config();
+require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -28,7 +28,7 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Middleware
+// Middleware (order matters!)
 app.use(express.json());
 app.use(
   session({
@@ -52,8 +52,11 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
-// Routes
+// Routes (after all middleware)
 app.use("/api/auth", authRoutes);
+app.use("/api/categories", require("./routes/categoryRoutes"));
+app.use("/api/services", require("./routes/serviceRoutes"));
+app.use("/api", require("./routes/reviewRoutes"));
 
 // Basic route to test server and DB connection
 app.get("/", (req, res) => {
