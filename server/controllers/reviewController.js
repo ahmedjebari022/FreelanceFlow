@@ -1,5 +1,6 @@
 const Review = require("../models/Review");
 const Service = require("../models/Service");
+const Order = require("../models/Order");
 
 const reviewController = {
   // Create review (clients only)
@@ -20,6 +21,23 @@ const reviewController = {
           .json({ message: "You have already reviewed this service" });
       }
 
+      // Check if client has a completed order for this service
+      const completedOrder = await Order.findOne({
+        service: serviceId,
+        client: req.user._id,
+        status: "completed",
+        isReviewable: true,
+      });
+
+      if (!completedOrder) {
+        return res
+          .status(403)
+          .json({
+            message:
+              "You can only review services you have ordered and completed",
+          });
+      }
+
       const review = new Review({
         service: serviceId,
         client: req.user._id,
@@ -38,6 +56,10 @@ const reviewController = {
         averageRating: avgRating,
         totalReviews: reviews.length,
       });
+
+      // Mark the order as reviewed
+      completedOrder.isReviewable = false;
+      await completedOrder.save();
 
       res.status(201).json(review);
     } catch (error) {

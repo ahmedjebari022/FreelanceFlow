@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 const Profile = () => {
   const { user, logout } = useContext(AuthContext);
@@ -209,6 +210,22 @@ const Profile = () => {
                 )}
               </button>
             </form>
+          )}
+
+          {user.role === "freelancer" && (
+            <div className="card bg-base-100 shadow-xl mb-6">
+              <div className="card-body">
+                <h2 className="card-title text-xl">Payment Settings</h2>
+                <p className="mb-4">
+                  Set up your payment account to receive payments from clients.
+                </p>
+                <div className="card-actions">
+                  <Link to="/payment-setup" className="btn btn-primary">
+                    Manage Payment Account
+                  </Link>
+                </div>
+              </div>
+            </div>
           )}
 
           <div className="divider my-6"></div>

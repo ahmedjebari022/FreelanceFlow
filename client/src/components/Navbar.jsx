@@ -8,10 +8,16 @@ const Navbar = () => {
   const FreelancerLinks = () => (
     <>
       <li>
-        <Link to="/projects">Find Projects</Link>
+        <Link to="/categories">Browse Categories</Link>
       </li>
       <li>
-        <Link to="/my-proposals">My Proposals</Link>
+        <Link to="/my-services">My Services</Link>
+      </li>
+      <li>
+        <Link to="/orders">My Orders</Link>
+      </li>
+      <li>
+        <Link to="/payment-setup">Payment Setup</Link>
       </li>
     </>
   );
@@ -19,10 +25,18 @@ const Navbar = () => {
   const ClientLinks = () => (
     <>
       <li>
-        <Link to="/post-project">Post a Project</Link>
+        <Link to="/categories">Find Services</Link>
       </li>
       <li>
-        <Link to="/my-projects">My Projects</Link>
+        <Link to="/orders">My Orders</Link>
+      </li>
+    </>
+  );
+
+  const GuestLinks = () => (
+    <>
+      <li>
+        <Link to="/categories">Browse Services</Link>
       </li>
     </>
   );
@@ -57,7 +71,9 @@ const Navbar = () => {
               ) : (
                 <ClientLinks />
               )
-            ) : null}
+            ) : (
+              <GuestLinks />
+            )}
           </ul>
         </div>
         <Link to="/" className="btn btn-ghost normal-case text-xl">
@@ -73,7 +89,9 @@ const Navbar = () => {
             ) : (
               <ClientLinks />
             )
-          ) : null}
+          ) : (
+            <GuestLinks />
+          )}
         </ul>
       </div>
 

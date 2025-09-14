@@ -5,6 +5,8 @@ const { isAuthenticated } = require("../middleware/authMiddleware");
 const upload = require("../middleware/uploadMiddleware");
 
 router.get("/", serviceController.getAllServices);
+// Add this new route before the /:id route
+router.get("/my-services", isAuthenticated, serviceController.getMyServices);
 router.get("/:id", serviceController.getServiceById);
 router.post(
   "/",

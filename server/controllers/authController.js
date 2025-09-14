@@ -130,6 +130,8 @@ const resetPasswordWithToken = async (req, res) => {
   }
 };
 
+
+
 module.exports = {
   register,
   login,
@@ -139,4 +141,5 @@ module.exports = {
   changePassword,
   forgotPassword,
   resetPasswordWithToken,
+ 
 };

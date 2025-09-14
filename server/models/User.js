@@ -29,6 +29,15 @@ const userSchema = new mongoose.Schema(
       enum: ["freelancer", "client", "admin"], // Adjust roles as needed
       default: "freelancer",
     },
+    // Stripe Connect fields
+    stripeConnectId: {
+      type: String,
+      default: null,
+    },
+    payoutEnabled: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true, // Adds createdAt and updatedAt

@@ -3,10 +3,23 @@ const cloudinary = require("../config/cloudinary");
 const { Readable } = require("stream");
 
 const categoryController = {
-  // Get all categories
+  // Get all categories with search functionality
   getAllCategories: async (req, res) => {
     try {
-      const categories = await Category.find();
+      const { search } = req.query;
+      let query = {};
+
+      // If search term exists, create a case-insensitive regex search
+      if (search) {
+        query = {
+          $or: [
+            { name: { $regex: search, $options: "i" } },
+            { description: { $regex: search, $options: "i" } },
+          ],
+        };
+      }
+
+      const categories = await Category.find(query);
       res.json(categories);
     } catch (error) {
       res.status(500).json({ message: error.message });

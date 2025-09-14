@@ -1,4 +1,5 @@
 const Service = require("../models/Service");
+const Category = require("../models/Category");
 const cloudinary = require("../config/cloudinary");
 const { Readable } = require("stream");
 
@@ -58,23 +59,48 @@ const serviceController = {
       const { category, minPrice, maxPrice, search } = req.query;
       let query = { isActive: true };
 
-      if (category) query.category = category;
+      // Find category by name first if category filter is present
+      if (category && category !== "") {
+        const categoryDoc = await Category.findOne({ name: category });
+        if (categoryDoc) {
+          query.category = categoryDoc._id;
+        }
+      }
+
       if (minPrice || maxPrice) {
         query.price = {};
         if (minPrice) query.price.$gte = Number(minPrice);
         if (maxPrice) query.price.$lte = Number(maxPrice);
       }
+
       if (search) {
         query.$text = { $search: search };
       }
 
+      console.log("Query:", query);
       const services = await Service.find(query)
         .populate("freelancer", "firstName lastName location")
         .populate("category", "name");
 
       res.json(services);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      console.error("Service fetch error:", error);
+      res.status(500).json({
+        message: "Error fetching services",
+        error: error.message,
+      });
+    }
+  },
+
+  // Get my services (freelancer)
+  getMyServices: async (req, res) => {
+    try {
+      const services = await Service.find({ freelancer: req.user._id })
+        .populate("category", "name")
+        .sort({ createdAt: -1 });
+      res.json(services);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching your services", error: error.message });
     }
   },
 
