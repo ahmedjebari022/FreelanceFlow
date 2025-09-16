@@ -8,6 +8,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { SocketProvider } from "./context/SocketContext";
 
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer"; // Import the Footer component
 import Home from "./components/Home";
 import Login from "./components/Login";
 import Register from "./components/Register";
@@ -38,6 +39,7 @@ import AdminOrderDetail from "./components/admin/AdminOrderDetail";
 import AdminPayments from "./components/admin/AdminPayments";
 import AdminPaymentDetail from "./components/admin/AdminPaymentDetail";
 import PaymentStats from "./components/admin/PaymentStats";
+import About from "./components/About";
 
 // Component to conditionally render Navbar
 const AppContent = () => {
@@ -79,6 +81,7 @@ const AppContent = () => {
           element={<PaymentSetup />}
         />
         <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
           <Route path="users" element={<AdminUsers />} />
@@ -93,6 +96,7 @@ const AppContent = () => {
           <Route path="categories" element={<AdminCategories />} />
         </Route>
       </Routes>
+      {!hideNavbar && <Footer />} {/* Only show Footer when Navbar is shown */}
     </>
   );
 };
