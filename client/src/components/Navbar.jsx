@@ -57,6 +57,11 @@ const Navbar = () => {
   // Check if there are unread notifications
   const hasUnread = notifications.some((n) => !n.read);
 
+  // Check if services link should be active
+  const isServicesActive =
+    location.pathname === "/categories" ||
+    location.pathname.startsWith("/services");
+
   return (
     <header
       className={`sticky top-0 z-40 transition-all duration-200 ${
@@ -96,65 +101,47 @@ const Navbar = () => {
         {/* Center navigation - only on desktop */}
         <div className="navbar-center hidden lg:flex">
           <ul className="menu menu-horizontal px-1 gap-1">
-            <li>
-              <Link
-                to="/"
-                className={
-                  location.pathname === "/"
-                    ? "active font-medium"
-                    : "font-medium"
-                }
-              >
+            <li
+              className={
+                location.pathname === "/"
+                  ? "font-bold border-b-2 border-primary"
+                  : ""
+              }
+            >
+              <Link to="/" className="font-medium">
                 Home
               </Link>
             </li>
-            <li>
-              <Link
-                to="/categories"
-                className={
-                  location.pathname === "/categories"
-                    ? "active font-medium"
-                    : "font-medium"
-                }
-              >
-                Categories
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/services"
-                className={
-                  location.pathname === "/services"
-                    ? "active font-medium"
-                    : "font-medium"
-                }
-              >
+            <li
+              className={
+                isServicesActive ? "font-bold border-b-2 border-primary" : ""
+              }
+            >
+              <Link to="/categories" className="font-medium">
                 Services
               </Link>
             </li>
             {user && user.role === "freelancer" && (
-              <li>
-                <Link
-                  to="/my-services"
-                  className={
-                    location.pathname === "/my-services"
-                      ? "active font-medium"
-                      : "font-medium"
-                  }
-                >
+              <li
+                className={
+                  location.pathname === "/my-services"
+                    ? "font-bold border-b-2 border-primary"
+                    : ""
+                }
+              >
+                <Link to="/my-services" className="font-medium">
                   My Services
                 </Link>
               </li>
             )}
-            <li>
-              <Link
-                to="/about"
-                className={
-                  location.pathname === "/about"
-                    ? "active font-medium"
-                    : "font-medium"
-                }
-              >
+            <li
+              className={
+                location.pathname === "/about"
+                  ? "font-bold border-b-2 border-primary"
+                  : ""
+              }
+            >
+              <Link to="/about" className="font-medium">
                 About
               </Link>
             </li>
@@ -473,18 +460,7 @@ const Navbar = () => {
             </Link>
           </li>
           <li>
-            <Link
-              to="/categories"
-              className={location.pathname === "/categories" ? "active" : ""}
-            >
-              Categories
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/services"
-              className={location.pathname === "/services" ? "active" : ""}
-            >
+            <Link to="/categories" className={isServicesActive ? "active" : ""}>
               Services
             </Link>
           </li>

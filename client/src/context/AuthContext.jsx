@@ -25,24 +25,34 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-  try {
-    const response = await axios.post(
-      "/api/auth/login",
-      { email, password },
-      { withCredentials: true }
-    );
-    await getMe();
-    return response.data;
-  } catch (error) {
-    console.error("Login error:", error);
-    // Make sure to throw the error so the component can catch it
-    throw error;
-  }
-};
+    try {
+      const response = await axios.post(
+        "/api/auth/login",
+        { email, password },
+        { withCredentials: true }
+      );
+      await getMe();
+      return response.data;
+    } catch (error) {
+      console.error("Login error:", error);
+      // Make sure to throw the error so the component can catch it
+      throw error;
+    }
+  };
 
   const logout = async () => {
-    await axios.post("/api/auth/logout", {}, { withCredentials: true });
-    setUser(null);
+    try {
+      await axios.post("/api/auth/logout", {}, { withCredentials: true });
+      setUser(null);
+
+      // Add this redirect after successful logout
+      window.location.href = "/login"; // Redirects to login page
+
+      // Alternative: Use navigate if you're using it in this file
+      // navigate('/login');
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   return (
