@@ -3,6 +3,8 @@ const jwt = require("jsonwebtoken");
 const passport = require("passport");
 const User = require("../models/User");
 const { sendResetEmail } = require("../utils/email");
+const cloudinary = require("../config/cloudinary");
+const { Readable } = require("stream");
 
 const register = async (req, res) => {
   try {
@@ -57,6 +59,11 @@ const getMe = (req, res) => {
       lastName: req.user.lastName,
       email: req.user.email,
       role: req.user.role,
+      profileImage: req.user.profileImage,
+      stripeConnectId: req.user.stripeConnectId,
+      payoutEnabled: req.user.payoutEnabled,
+      isActive: req.user.isActive,
+      createdAt: req.user.createdAt,
     },
   });
 };
@@ -64,13 +71,50 @@ const getMe = (req, res) => {
 const updateProfile = async (req, res) => {
   try {
     const { firstName, lastName, email } = req.body;
+    const updateData = { firstName, lastName, email };
+
+    // Handle profile image upload if present
+    if (req.file) {
+      // Create a stream from buffer
+      const stream = Readable.from(req.file.buffer);
+
+      // Upload to Cloudinary
+      const uploadPromise = new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: "profile_images",
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        stream.pipe(uploadStream);
+      });
+
+      const uploadResult = await uploadPromise;
+      updateData.profileImage = uploadResult.secure_url;
+    }
+
     const user = await User.findByIdAndUpdate(
       req.user._id,
-      { firstName, lastName, email },
+      updateData,
       { new: true }
-    );
-    res.json({ message: "Profile updated", user });
+    ).select("-passwordHash");
+
+    res.json({
+      message: "Profile updated",
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+        profileImage: user.profileImage,
+      },
+    });
   } catch (error) {
+    console.error("Profile update error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -130,8 +174,6 @@ const resetPasswordWithToken = async (req, res) => {
   }
 };
 
-
-
 module.exports = {
   register,
   login,
@@ -141,5 +183,4 @@ module.exports = {
   changePassword,
   forgotPassword,
   resetPasswordWithToken,
- 
 };

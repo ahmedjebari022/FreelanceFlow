@@ -12,6 +12,31 @@ const serviceSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    // Add service features as an array
+    features: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+    // Add requirements/prerequisites
+    requirements: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    // Add delivery time in days
+    deliveryTime: {
+      type: Number,
+      default: 7,
+      min: 1,
+    },
+    // Add revisions allowed
+    revisions: {
+      type: Number,
+      default: 3,
+      min: 0,
+    },
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
@@ -37,10 +62,22 @@ const serviceSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    status: {
+      type: String,
+      enum: ["pending", "active", "inactive", "rejected"],
+      default: "active",
+    },
     isActive: {
       type: Boolean,
       default: true,
     },
+    statusHistory: [
+      {
+        status: String,
+        date: Date,
+        reason: String,
+      },
+    ],
     images: [
       {
         url: {

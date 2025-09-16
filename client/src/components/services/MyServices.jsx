@@ -103,10 +103,7 @@ const MyServices = () => {
               >
                 Cancel
               </button>
-              <button
-                onClick={handleDeleteService}
-                className="btn btn-error"
-              >
+              <button onClick={handleDeleteService} className="btn btn-error">
                 Delete
               </button>
             </div>
@@ -174,7 +171,39 @@ const EditServiceModal = ({ service, onUpdate, onCancel }) => {
     title: service.title,
     description: service.description,
     price: service.price,
+    features: service.features || ["", "", ""],
+    requirements: service.requirements || "",
+    deliveryTime: service.deliveryTime || 7,
+    revisions: service.revisions || 3,
   });
+
+  // Handle feature updates
+  const handleFeatureChange = (index, value) => {
+    const updatedFeatures = [...formData.features];
+    updatedFeatures[index] = value;
+    setFormData({
+      ...formData,
+      features: updatedFeatures,
+    });
+  };
+
+  // Add more feature fields
+  const addFeatureField = () => {
+    setFormData({
+      ...formData,
+      features: [...formData.features, ""],
+    });
+  };
+
+  // Remove a feature field
+  const removeFeatureField = (index) => {
+    const updatedFeatures = [...formData.features];
+    updatedFeatures.splice(index, 1);
+    setFormData({
+      ...formData,
+      features: updatedFeatures,
+    });
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -205,6 +234,7 @@ const EditServiceModal = ({ service, onUpdate, onCancel }) => {
               }
             />
           </div>
+
           <div>
             <label className="label">
               <span className="label-text">Description</span>
@@ -217,19 +247,102 @@ const EditServiceModal = ({ service, onUpdate, onCancel }) => {
               }
             />
           </div>
+
           <div>
             <label className="label">
-              <span className="label-text">Price ($)</span>
+              <span className="label-text">Features</span>
+              <span className="label-text-alt">What you'll provide</span>
             </label>
-            <input
-              type="number"
-              className="input input-bordered w-full"
-              value={formData.price}
+            {formData.features.map((feature, index) => (
+              <div key={index} className="flex gap-2 mb-2">
+                <input
+                  type="text"
+                  className="input input-bordered w-full"
+                  placeholder={`Feature ${index + 1}`}
+                  value={feature}
+                  onChange={(e) => handleFeatureChange(index, e.target.value)}
+                />
+                {formData.features.length > 1 && (
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => removeFeatureField(index)}
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            ))}
+            <button
+              type="button"
+              className="btn btn-outline btn-sm mt-2"
+              onClick={addFeatureField}
+            >
+              Add Feature
+            </button>
+          </div>
+
+          <div>
+            <label className="label">
+              <span className="label-text">Requirements</span>
+              <span className="label-text-alt">What you need from clients</span>
+            </label>
+            <textarea
+              className="textarea textarea-bordered w-full"
+              placeholder="Information you'll need from the client"
+              value={formData.requirements}
               onChange={(e) =>
-                setFormData({ ...formData, price: e.target.value })
+                setFormData({ ...formData, requirements: e.target.value })
               }
             />
           </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="label">
+                <span className="label-text">Price ($)</span>
+              </label>
+              <input
+                type="number"
+                className="input input-bordered w-full"
+                value={formData.price}
+                onChange={(e) =>
+                  setFormData({ ...formData, price: e.target.value })
+                }
+              />
+            </div>
+
+            <div>
+              <label className="label">
+                <span className="label-text">Delivery Time (days)</span>
+              </label>
+              <input
+                type="number"
+                className="input input-bordered w-full"
+                min="1"
+                value={formData.deliveryTime}
+                onChange={(e) =>
+                  setFormData({ ...formData, deliveryTime: e.target.value })
+                }
+              />
+            </div>
+
+            <div>
+              <label className="label">
+                <span className="label-text">Revisions</span>
+              </label>
+              <input
+                type="number"
+                className="input input-bordered w-full"
+                min="0"
+                value={formData.revisions}
+                onChange={(e) =>
+                  setFormData({ ...formData, revisions: e.target.value })
+                }
+              />
+            </div>
+          </div>
+
           <div className="modal-action border-t pt-4">
             <button type="button" className="btn btn-ghost" onClick={onCancel}>
               Cancel

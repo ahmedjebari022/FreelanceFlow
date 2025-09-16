@@ -10,6 +10,7 @@ const {
   resetPasswordWithToken,
 } = require("../controllers/authController");
 const { isAuthenticated } = require("../middleware/authMiddleware");
+const upload = require("../middleware/uploadMiddleware");
 
 const router = express.Router();
 
@@ -17,7 +18,8 @@ router.post("/register", register);
 router.post("/login", login);
 router.post("/logout", logout);
 router.get("/me", isAuthenticated, getMe);
-router.put("/profile", isAuthenticated, updateProfile);
+// Update this route to handle file uploads
+router.put("/profile", isAuthenticated, upload.single('profileImage'), updateProfile);
 router.put("/change-password", isAuthenticated, changePassword);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPasswordWithToken);

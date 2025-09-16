@@ -8,6 +8,7 @@ const passport = require("./config/passport");
 const authRoutes = require("./routes/authRoutes");
 const http = require("http"); // Add this
 const { initializeSocket } = require("./config/socket"); // Add this
+const MongoStore = require("connect-mongo");
 require("dotenv").config();
 
 const app = express();
@@ -24,6 +25,8 @@ app.use(
   cors({
     origin: process.env.CLIENT_URL || "http://localhost:5173", // Allow client origin
     credentials: true, // Allow cookies/sessions
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 const limiter = rateLimit({
@@ -36,10 +39,20 @@ app.use(limiter);
 // Middleware (order matters!)
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "your-session-secret", // Use a strong secret
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false }, // Set to true in production with HTTPS
+    store: MongoStore.create({
+      mongoUrl: "mongodb://localhost:27017/FreelanceFlow",
+      ttl: 14 * 24 * 60 * 60, // 14 days
+      autoRemove: "native",
+    }),
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+      secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
+      sameSite: "lax",
+    },
   })
 );
 app.use(passport.initialize());
@@ -77,10 +90,26 @@ app.use("/api", require("./routes/reviewRoutes"));
 // Regular payment routes
 app.use("/api/payments", require("./routes/paymentRoutes"));
 
+// Add to app.js
+app.use("/api/freelancer", require("./routes/freelancerRoutes"));
+
+// In server/app.js - Add this line with your other route imports
+app.use("/api/admin", require("./routes/adminRoutes"));
+
 // Basic route to test server and DB connection
 app.get("/", (req, res) => {
   res.send("Server is running and connected to MongoDB!");
 });
+
+// Add to app.js
+if (process.env.NODE_ENV === "development") {
+  app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    console.log("Session ID:", req.sessionID);
+    console.log("Authenticated:", req.isAuthenticated());
+    next();
+  });
+}
 
 // Start server
 server.listen(PORT, () => {

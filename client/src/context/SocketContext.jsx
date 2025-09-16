@@ -13,7 +13,27 @@ export const SocketProvider = ({ children }) => {
     // Initialize socket connection when user logs in
     if (user) {
       const newSocket = io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:3000', {
-        withCredentials: true
+        withCredentials: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
+        timeout: 10000,
+        autoConnect: true
+      });
+      
+      newSocket.on('connect', () => {
+        console.log('Socket connected:', newSocket.id);
+        // Re-join rooms after reconnection
+        if (user.id) {
+          newSocket.emit('subscribe-user', user.id);
+        }
+      });
+
+      newSocket.on('disconnect', (reason) => {
+        console.log('Socket disconnected:', reason);
+      });
+
+      newSocket.on('connect_error', (error) => {
+        console.error('Connection error:', error);
       });
       
       setSocket(newSocket);

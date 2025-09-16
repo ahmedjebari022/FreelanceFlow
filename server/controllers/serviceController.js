@@ -23,7 +23,16 @@ const serviceController = {
   // Create service (for freelancers)
   createService: async (req, res) => {
     try {
-      const { title, description, category, price } = req.body;
+      const {
+        title,
+        description,
+        category,
+        price,
+        features,
+        requirements,
+        deliveryTime,
+        revisions,
+      } = req.body;
 
       // Handle image uploads
       const imageUrls = [];
@@ -37,6 +46,17 @@ const serviceController = {
         }
       }
 
+      // Parse features if they're sent as a string
+      let featuresArray = features;
+      if (features && typeof features === "string") {
+        try {
+          featuresArray = JSON.parse(features);
+        } catch {
+          // If parsing fails, split by newlines
+          featuresArray = features.split("\n").filter((line) => line.trim() !== "");
+        }
+      }
+
       const service = new Service({
         title,
         description,
@@ -44,6 +64,10 @@ const serviceController = {
         price,
         freelancer: req.user._id,
         images: imageUrls,
+        features: featuresArray || [],
+        requirements: requirements || "",
+        deliveryTime: deliveryTime || 7,
+        revisions: revisions || 3,
       });
 
       await service.save();
@@ -59,11 +83,20 @@ const serviceController = {
       const { category, minPrice, maxPrice, search } = req.query;
       let query = { isActive: true };
 
-      // Find category by name first if category filter is present
+      // Find category by slug or name first if category filter is present
       if (category && category !== "") {
-        const categoryDoc = await Category.findOne({ name: category });
+        // Try to find by slug first
+        const categoryDoc = await Category.findOne({
+          $or: [{ slug: category }, { name: category }],
+        });
+
         if (categoryDoc) {
           query.category = categoryDoc._id;
+          console.log("Category found:", categoryDoc.name, "ID:", categoryDoc._id);
+        } else {
+          console.log("Category not found:", category);
+          // If we can't find the category, return an empty result
+          return res.json([]);
         }
       }
 
@@ -77,7 +110,7 @@ const serviceController = {
         query.$text = { $search: search };
       }
 
-      console.log("Query:", query);
+      console.log("Final query:", JSON.stringify(query));
       const services = await Service.find(query)
         .populate("freelancer", "firstName lastName location")
         .populate("category", "name");
@@ -124,8 +157,35 @@ const serviceController = {
   // Update service (freelancer only)
   updateService: async (req, res) => {
     try {
-      const { title, description, category, price } = req.body;
+      const {
+        title,
+        description,
+        category,
+        price,
+        features,
+        requirements,
+        deliveryTime,
+        revisions,
+      } = req.body;
       const updateData = { title, description, category, price };
+
+      // Parse features if they're sent as a string
+      if (features) {
+        let featuresArray = features;
+        if (typeof features === "string") {
+          try {
+            featuresArray = JSON.parse(features);
+          } catch {
+            // If parsing fails, split by newlines
+            featuresArray = features.split("\n").filter((line) => line.trim() !== "");
+          }
+        }
+        updateData.features = featuresArray;
+      }
+
+      if (requirements !== undefined) updateData.requirements = requirements;
+      if (deliveryTime !== undefined) updateData.deliveryTime = deliveryTime;
+      if (revisions !== undefined) updateData.revisions = revisions;
 
       // Handle new image uploads
       if (req.files && req.files.length > 0) {

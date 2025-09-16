@@ -1,5 +1,11 @@
 const isAuthenticated = (req, res, next) => {
-  if (req.isAuthenticated()) return next();
+  if (req.isAuthenticated()) {
+    // Refresh session expiry on each authenticated request
+    if (req.session.cookie) {
+      req.session.touch(); // Refresh the session
+    }
+    return next();
+  }
   res.status(401).json({ message: "Unauthorized" });
 };
 

@@ -28,5 +28,13 @@ const categorySchema = new mongoose.Schema(
   }
 );
 
+// Add a pre-save hook to generate a slug if not provided
+categorySchema.pre("save", function (next) {
+  if (!this.slug && this.name) {
+    this.slug = this.name.toLowerCase().replace(/\s+/g, "-");
+  }
+  next();
+});
+
 const Category = mongoose.model("Category", categorySchema);
 module.exports = Category;
